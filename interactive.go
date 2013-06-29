@@ -42,19 +42,19 @@ func watch(dirPath string, watcher *fsnotify.Watcher) *fsnotify.Watcher {
 	return watcher
 }
 
-func parseParents(dir, sourceDir string) map[string][]byte {
+func parseParents(dir, sourceDir string, exts []string) map[string][]byte {
 	dirs := strings.Split(strings.TrimPrefix(dir, sourceDir), "/")
 	elements := make(map[string][]byte)
 	for _, dir := range dirs {
-		elements = parse(path.Join(sourceDir, dir), elements, false)
+		elements = parse(path.Join(sourceDir, dir), elements, exts, false)
 	}
 	return elements
 }
 
-func interactive(sourceDir, outputDir string) {
+func interactive(sourceDir, outputDir string, exts []string, saveAs string) {
 
 	// compile the whole site
-	compiled(sourceDir, outputDir)
+	compiled(sourceDir, outputDir, exts, saveAs)
 
 	// watch the source dir
 	watcher, err := fsnotify.NewWatcher()
@@ -90,7 +90,7 @@ func interactive(sourceDir, outputDir string) {
 			// remove previously compiled files
 			if ev.IsDelete() || ev.IsRename() || ev.IsModify() {
 				var err error
-				if isDir(ev.Name) || !isParsable(ev.Name) {
+				if isDir(ev.Name) || !isParsable(ev.Name, exts) {
 					err = os.RemoveAll(path.Join(outputDir, strings.TrimPrefix(ev.Name, sourceDir)))
 				} else {
 					err = os.RemoveAll(path.Join(outputDir, strings.TrimPrefix(dir, sourceDir)))
@@ -104,17 +104,17 @@ func interactive(sourceDir, outputDir string) {
 			// recompile changed files
 			if ev.IsCreate() || ev.IsModify() {
 				if isDir(ev.Name) {
-					elements := parseParents(ev.Name, sourceDir)
+					elements := parseParents(ev.Name, sourceDir, exts)
 					dirPath := path.Join(sourceDir, strings.TrimPrefix(ev.Name, sourceDir))
-					go compile(dirPath, elements, sourceDir, outputDir, true)
-					go copyFiles(dirPath, sourceDir, outputDir, true)
+					go compile(dirPath, elements, sourceDir, outputDir, saveAs, exts, true)
+					go copyFiles(dirPath, sourceDir, outputDir, exts, true)
 				} else {
 					dirPath := path.Join(sourceDir, strings.TrimPrefix(dir, sourceDir))
-					if isParsable(path.Ext(ev.Name)) {
-						elements := parseParents(dir, sourceDir)
-						go compile(dirPath, elements, sourceDir, outputDir, true)
+					if isParsable(path.Ext(ev.Name), exts) {
+						elements := parseParents(dir, sourceDir, exts)
+						go compile(dirPath, elements, sourceDir, outputDir, saveAs, exts, true)
 					}
-					go copyFiles(dirPath, sourceDir, outputDir, false)
+					go copyFiles(dirPath, sourceDir, outputDir, exts, false)
 				}
 			}
 

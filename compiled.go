@@ -25,7 +25,7 @@ import (
 	"time"
 )
 
-func compiled(sourceDir, outputDir string) {
+func compiled(sourceDir, outputDir string, exts []string, saveAs string) {
 	// remove previously compiled site
 	err := os.RemoveAll(outputDir)
 	if err != nil {
@@ -34,8 +34,8 @@ func compiled(sourceDir, outputDir string) {
 	}
 
 	// compile everything
-	go compile(sourceDir, make(map[string][]byte), sourceDir, outputDir, true)
-	go copyFiles(sourceDir, sourceDir, outputDir, true)
+	go compile(sourceDir, make(map[string][]byte), sourceDir, outputDir, saveAs, exts, true)
+	go copyFiles(sourceDir, sourceDir, outputDir, exts, true)
 
 	// sleep some milliseconds to prevent early exit
 	time.Sleep(time.Millisecond * 100)

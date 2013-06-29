@@ -22,6 +22,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strings"
 )
 
 var settings struct {
@@ -29,6 +30,8 @@ var settings struct {
 	sourceDir *string
 	outputDir *string // for compiled site
 	port      *string // for the integrated web server (dynamic mode only)
+	exts      []string
+	saveAs    *string
 }
 
 func init() {
@@ -37,7 +40,13 @@ func init() {
 	settings.sourceDir = flag.String("source", ".", "Path to sources directory.")
 	settings.outputDir = flag.String("output", "./out", "[compiled mode] Path to output directory.")
 	settings.port = flag.String("port", "8080", "[dynamic mode] Port to listen.")
+	exts := flag.String("exts", "html, txt, md", "List parsable file extensions. Separated by commas.")
+	settings.saveAs = flag.String("saveAs", "index.html", "[compiled and interactive modes] Save compiled files as named.")
 	flag.Parse()
+	settings.exts = strings.Split(*exts, ",")
+	for i, ext := range settings.exts {
+		settings.exts[i] = "." + strings.Trim(ext, ". ")
+	}
 }
 
 func main() {
@@ -49,9 +58,9 @@ func main() {
 
 	switch *settings.mode {
 	case "compiled":
-		compiled(*settings.sourceDir, *settings.outputDir)
+		compiled(*settings.sourceDir, *settings.outputDir, settings.exts, *settings.saveAs)
 	case "interactive":
-		interactive(*settings.sourceDir, *settings.outputDir)
+		interactive(*settings.sourceDir, *settings.outputDir, settings.exts, *settings.saveAs)
 	case "dynamic":
 		dynamic(*settings.port)
 	default:

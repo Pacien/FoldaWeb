@@ -29,7 +29,7 @@ import (
 
 func handle(w http.ResponseWriter, r *http.Request) {
 	// serve static files
-	if !(path.Ext(r.URL.Path) == "" || isParsable(path.Ext(r.URL.Path))) {
+	if !(path.Ext(r.URL.Path) == "" || isParsable(path.Ext(r.URL.Path), settings.exts)) {
 		http.ServeFile(w, r, path.Join(*settings.sourceDir, r.URL.Path))
 		return
 	}
@@ -44,7 +44,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// parse these dirs
 	elements := make(map[string][]byte)
 	for _, dir := range dirs {
-		parse(path.Join(*settings.sourceDir, dir), elements, false)
+		parse(path.Join(*settings.sourceDir, dir), elements, settings.exts, false)
 	}
 
 	// render the page

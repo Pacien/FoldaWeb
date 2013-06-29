@@ -34,10 +34,11 @@ var wait sync.WaitGroup
 
 // Common templating
 
-func isParsable(fileName string) bool {
-	switch path.Ext(fileName) {
-	case ".md", ".html", ".txt":
-		return true
+func isParsable(fileName string, exts []string) bool {
+	for _, ext := range exts {
+		if path.Ext(fileName) == ext {
+			return true
+		}
 	}
 	return false
 }
@@ -67,10 +68,10 @@ func merge(files map[string][]byte) (merged []byte) {
 
 // render and write everything inside
 
-func parse(dirPath string, elements map[string][]byte, overwrite bool) map[string][]byte {
+func parse(dirPath string, elements map[string][]byte, exts []string, overwrite bool) map[string][]byte {
 	_, filesList := ls(dirPath)
 	for _, fileName := range filesList {
-		if isParsable(fileName) && (overwrite || elements[fileName[:len(fileName)-len(path.Ext(fileName))]] == nil) {
+		if isParsable(fileName, exts) && (overwrite || elements[fileName[:len(fileName)-len(path.Ext(fileName))]] == nil) {
 			var err error
 			elements[fileName[:len(fileName)-len(path.Ext(fileName))]], err = read(path.Join(dirPath, fileName))
 			if err != nil {
@@ -81,7 +82,7 @@ func parse(dirPath string, elements map[string][]byte, overwrite bool) map[strin
 	return elements
 }
 
-func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir string, recursive bool) {
+func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, saveAs string, exts []string, recursive bool) {
 	wait.Add(1)
 	defer wait.Done()
 
@@ -89,26 +90,26 @@ func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir st
 		return
 	}
 
-	elements = parse(dirPath, elements, true)
+	elements = parse(dirPath, elements, exts, true)
 
 	if recursive {
 		dirs, _ := ls(dirPath)
 		for _, dir := range dirs {
-			go compile(path.Join(dirPath, dir), elements, sourceDir, outputDir, recursive)
+			go compile(path.Join(dirPath, dir), elements, sourceDir, outputDir, saveAs, exts, recursive)
 		}
 	}
 
 	template := merge(elements)
 	page := mustache.Render(string(template), nil /* TODO: generate contextual variables */)
 
-	err := writeFile(path.Join(outputDir, strings.TrimPrefix(dirPath, sourceDir), "index.html"), []byte(page))
+	err := writeFile(path.Join(outputDir, strings.TrimPrefix(dirPath, sourceDir), saveAs), []byte(page))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 }
 
-func copyFiles(dirPath, sourceDir, outputDir string, recursive bool) {
+func copyFiles(dirPath, sourceDir, outputDir string, exts []string, recursive bool) {
 	wait.Add(1)
 	defer wait.Done()
 
@@ -118,7 +119,7 @@ func copyFiles(dirPath, sourceDir, outputDir string, recursive bool) {
 
 	dirs, files := ls(dirPath)
 	for _, file := range files {
-		if !isParsable(file) {
+		if !isParsable(file, exts) {
 			err := cp(path.Join(dirPath, file), path.Join(outputDir, strings.TrimPrefix(dirPath, sourceDir), file))
 			if err != nil {
 				fmt.Println(err)
@@ -128,7 +129,7 @@ func copyFiles(dirPath, sourceDir, outputDir string, recursive bool) {
 
 	if recursive {
 		for _, dir := range dirs {
-			go copyFiles(path.Join(dirPath, dir), sourceDir, outputDir, recursive)
+			go copyFiles(path.Join(dirPath, dir), sourceDir, outputDir, exts, recursive)
 		}
 	}
 }
