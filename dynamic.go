@@ -21,7 +21,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/hoisie/mustache"
+	"github.com/drbawb/mustache"
 	"net/http"
 	"path"
 	"strings"
@@ -49,7 +49,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	// render the page
 	template := merge(elements)
-	page := mustache.Render(string(template), nil /* TODO: generate contextual variables */)
+	page := mustache.Render(string(template), makeContext(path.Join(*settings.sourceDir, request), *settings.sourceDir, *settings.outputDir, settings.exts))
 
 	// serve the page
 	_, err := w.Write([]byte(page))

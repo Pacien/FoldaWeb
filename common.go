@@ -22,7 +22,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/hoisie/mustache"
+	"github.com/drbawb/mustache"
 	"github.com/russross/blackfriday"
 	"io/ioutil"
 	"path"
@@ -100,7 +100,7 @@ func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, s
 	}
 
 	template := merge(elements)
-	page := mustache.Render(string(template), nil /* TODO: generate contextual variables */)
+	page := mustache.Render(string(template), makeContext(dirPath, sourceDir, outputDir, exts))
 
 	err := writeFile(path.Join(outputDir, strings.TrimPrefix(dirPath, sourceDir), saveAs), []byte(page))
 	if err != nil {
