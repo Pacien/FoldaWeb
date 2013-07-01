@@ -67,8 +67,6 @@ func merge(files map[string][]byte) (merged []byte) {
 
 // COMPILED and INTERACTIVE modes
 
-// render and write everything inside
-
 func parse(dirPath string, elements map[string][]byte, exts []string, overwrite bool) map[string][]byte {
 	_, filesList := fcmd.Ls(dirPath)
 	for _, fileName := range filesList {
