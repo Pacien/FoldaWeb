@@ -26,7 +26,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 )
 
 func watch(dirPath string, watcher *fsnotify.Watcher) *fsnotify.Watcher {
@@ -107,20 +106,20 @@ func interactive(sourceDir, outputDir string, exts []string, saveAs string) {
 				if fcmd.IsDir(ev.Name) {
 					elements := parseParents(ev.Name, sourceDir, exts)
 					dirPath := path.Join(sourceDir, strings.TrimPrefix(ev.Name, sourceDir))
+					wait.Add(2)
 					go compile(dirPath, elements, sourceDir, outputDir, saveAs, exts, true)
 					go copyFiles(dirPath, sourceDir, outputDir, exts, true)
 				} else {
 					dirPath := path.Join(sourceDir, strings.TrimPrefix(dir, sourceDir))
 					if isParsable(path.Ext(ev.Name), exts) {
 						elements := parseParents(dir, sourceDir, exts)
+						wait.Add(1)
 						go compile(dirPath, elements, sourceDir, outputDir, saveAs, exts, true)
 					}
+					wait.Add(1)
 					go copyFiles(dirPath, sourceDir, outputDir, exts, false)
 				}
 			}
-
-			// sleep some milliseconds to prevent early exit
-			time.Sleep(time.Millisecond * 100)
 
 			// wait until all tasks are completed
 			wait.Wait()

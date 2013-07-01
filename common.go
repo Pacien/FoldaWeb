@@ -84,7 +84,6 @@ func parse(dirPath string, elements map[string][]byte, exts []string, overwrite 
 }
 
 func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, saveAs string, exts []string, recursive bool) {
-	wait.Add(1)
 	defer wait.Done()
 
 	if strings.HasPrefix(dirPath, outputDir) {
@@ -96,6 +95,7 @@ func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, s
 	if recursive {
 		dirs, _ := fcmd.Ls(dirPath)
 		for _, dir := range dirs {
+			wait.Add(1)
 			go compile(path.Join(dirPath, dir), elements, sourceDir, outputDir, saveAs, exts, recursive)
 		}
 	}
@@ -111,7 +111,6 @@ func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, s
 }
 
 func copyFiles(dirPath, sourceDir, outputDir string, exts []string, recursive bool) {
-	wait.Add(1)
 	defer wait.Done()
 
 	if strings.HasPrefix(dirPath, outputDir) {
@@ -130,6 +129,7 @@ func copyFiles(dirPath, sourceDir, outputDir string, exts []string, recursive bo
 
 	if recursive {
 		for _, dir := range dirs {
+			wait.Add(1)
 			go copyFiles(path.Join(dirPath, dir), sourceDir, outputDir, exts, recursive)
 		}
 	}

@@ -22,7 +22,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 )
 
 func compiled(sourceDir, outputDir string, exts []string, saveAs string) {
@@ -34,11 +33,9 @@ func compiled(sourceDir, outputDir string, exts []string, saveAs string) {
 	}
 
 	// compile everything
+	wait.Add(2)
 	go compile(sourceDir, make(map[string][]byte), sourceDir, outputDir, saveAs, exts, true)
 	go copyFiles(sourceDir, sourceDir, outputDir, exts, true)
-
-	// sleep some milliseconds to prevent early exit
-	time.Sleep(time.Millisecond * 100)
 
 	// wait until all tasks are completed
 	wait.Wait()
