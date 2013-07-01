@@ -40,7 +40,7 @@ func init() {
 
 	// read settings
 	settings.mode = flag.String("mode", "compiled", "compiled|interactive|dynamic")
-	settings.sourceDir = flag.String("source", ".", "Path to sources directory.")
+	settings.sourceDir = flag.String("source", "./source", "Path to sources directory.")
 	settings.outputDir = flag.String("output", "./out", "[compiled mode] Path to output directory.")
 	settings.port = flag.String("port", "8080", "[dynamic mode] Port to listen.")
 	exts := flag.String("exts", "html, txt, md", "List parsable file extensions. Separated by commas.")
