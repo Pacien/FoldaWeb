@@ -20,6 +20,7 @@
 package main
 
 import (
+	"github.com/Pacien/fcmd"
 	"path"
 	"strings"
 )
@@ -48,7 +49,7 @@ func (c context) Title() string {
 }
 
 func (c context) SubPages() (subPages []page) {
-	dirs, _ := ls(c.path)
+	dirs, _ := fcmd.Ls(c.path)
 	for _, dir := range dirs {
 		var page page
 		page.Title = dir

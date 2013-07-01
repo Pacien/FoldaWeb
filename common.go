@@ -22,6 +22,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/Pacien/fcmd"
 	"github.com/drbawb/mustache"
 	"github.com/russross/blackfriday"
 	"io/ioutil"
@@ -69,7 +70,7 @@ func merge(files map[string][]byte) (merged []byte) {
 // render and write everything inside
 
 func parse(dirPath string, elements map[string][]byte, exts []string, overwrite bool) map[string][]byte {
-	_, filesList := ls(dirPath)
+	_, filesList := fcmd.Ls(dirPath)
 	for _, fileName := range filesList {
 		if isParsable(fileName, exts) && (overwrite || elements[fileName[:len(fileName)-len(path.Ext(fileName))]] == nil) {
 			var err error
@@ -93,7 +94,7 @@ func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, s
 	elements = parse(dirPath, elements, exts, true)
 
 	if recursive {
-		dirs, _ := ls(dirPath)
+		dirs, _ := fcmd.Ls(dirPath)
 		for _, dir := range dirs {
 			go compile(path.Join(dirPath, dir), elements, sourceDir, outputDir, saveAs, exts, recursive)
 		}
@@ -102,7 +103,7 @@ func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, s
 	template := merge(elements)
 	page := mustache.Render(string(template), makeContext(dirPath, sourceDir, outputDir, exts))
 
-	err := writeFile(path.Join(outputDir, strings.TrimPrefix(dirPath, sourceDir), saveAs), []byte(page))
+	err := fcmd.WriteFile(path.Join(outputDir, strings.TrimPrefix(dirPath, sourceDir), saveAs), []byte(page))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -117,10 +118,10 @@ func copyFiles(dirPath, sourceDir, outputDir string, exts []string, recursive bo
 		return
 	}
 
-	dirs, files := ls(dirPath)
+	dirs, files := fcmd.Ls(dirPath)
 	for _, file := range files {
 		if !isParsable(file, exts) {
-			err := cp(path.Join(dirPath, file), path.Join(outputDir, strings.TrimPrefix(dirPath, sourceDir), file))
+			err := fcmd.Cp(path.Join(dirPath, file), path.Join(outputDir, strings.TrimPrefix(dirPath, sourceDir), file))
 			if err != nil {
 				fmt.Println(err)
 			}

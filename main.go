@@ -22,6 +22,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/Pacien/fcmd"
 	"strings"
 )
 
@@ -35,6 +36,8 @@ var settings struct {
 }
 
 func init() {
+	fcmd.DefaultPerm = 0755 // -rwxr-xr-x
+
 	// read settings
 	settings.mode = flag.String("mode", "compiled", "compiled|interactive|dynamic")
 	settings.sourceDir = flag.String("source", ".", "Path to sources directory.")

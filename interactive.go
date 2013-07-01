@@ -21,6 +21,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/Pacien/fcmd"
 	"github.com/howeyc/fsnotify"
 	"os"
 	"path"
@@ -30,7 +31,7 @@ import (
 
 func watch(dirPath string, watcher *fsnotify.Watcher) *fsnotify.Watcher {
 	watcher.Watch(dirPath)
-	dirs := explore(dirPath)
+	dirs, _ := fcmd.Explore(dirPath)
 	for _, dir := range dirs {
 		if !strings.HasPrefix(dir, *settings.outputDir) {
 			err := watcher.Watch(dir)
@@ -70,7 +71,7 @@ func interactive(sourceDir, outputDir string, exts []string, saveAs string) {
 			fmt.Println(ev)
 
 			// ignore hidden files
-			if isHidden(ev.Name) {
+			if fcmd.IsHidden(ev.Name) {
 				break
 			}
 
@@ -81,7 +82,7 @@ func interactive(sourceDir, outputDir string, exts []string, saveAs string) {
 					fmt.Println(err)
 					return
 				}
-			} else if ev.IsCreate() && isDir(ev.Name) {
+			} else if ev.IsCreate() && fcmd.IsDir(ev.Name) {
 				watcher = watch(ev.Name, watcher)
 			}
 
@@ -90,7 +91,7 @@ func interactive(sourceDir, outputDir string, exts []string, saveAs string) {
 			// remove previously compiled files
 			if ev.IsDelete() || ev.IsRename() || ev.IsModify() {
 				var err error
-				if isDir(ev.Name) || !isParsable(ev.Name, exts) {
+				if fcmd.IsDir(ev.Name) || !isParsable(ev.Name, exts) {
 					err = os.RemoveAll(path.Join(outputDir, strings.TrimPrefix(ev.Name, sourceDir)))
 				} else {
 					err = os.RemoveAll(path.Join(outputDir, strings.TrimPrefix(dir, sourceDir)))
@@ -103,7 +104,7 @@ func interactive(sourceDir, outputDir string, exts []string, saveAs string) {
 
 			// recompile changed files
 			if ev.IsCreate() || ev.IsModify() {
-				if isDir(ev.Name) {
+				if fcmd.IsDir(ev.Name) {
 					elements := parseParents(ev.Name, sourceDir, exts)
 					dirPath := path.Join(sourceDir, strings.TrimPrefix(ev.Name, sourceDir))
 					go compile(dirPath, elements, sourceDir, outputDir, saveAs, exts, true)
