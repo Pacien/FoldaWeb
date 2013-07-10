@@ -50,6 +50,8 @@ func init() {
 	for i, ext := range settings.exts {
 		settings.exts[i] = "." + strings.Trim(ext, ". ")
 	}
+	*settings.sourceDir = strings.TrimPrefix(*settings.sourceDir, "./")
+	*settings.outputDir = strings.TrimPrefix(*settings.outputDir, "./")
 }
 
 func main() {
