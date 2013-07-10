@@ -27,40 +27,36 @@ import (
 
 type page struct {
 	Title string
-	URL   string
+	Path  string
 }
 
 type context struct {
-	path      string
+	filePath  string
+	Path      string
 	IsCurrent func(params []string, data string) string
 	IsParent  func(params []string, data string) string
 }
 
 // Methods accessible in templates
 
-func (c context) URL() string {
-	p := strings.TrimPrefix(c.path, *settings.sourceDir)
-	return path.Clean("/" + p)
-}
-
 func (c context) Title() string {
-	_, t := path.Split(strings.TrimRight(c.URL(), "/"))
+	_, t := path.Split(strings.TrimRight(c.Path, "/"))
 	return t
 }
 
 func (c context) SubPages() (subPages []page) {
-	dirs, _ := fcmd.Ls(c.path)
+	dirs, _ := fcmd.Ls(c.filePath)
 	for _, dir := range dirs {
 		var page page
 		page.Title = dir
-		page.URL = path.Join(c.URL(), dir)
+		page.Path = path.Join(c.Path, dir)
 		subPages = append(subPages, page)
 	}
 	return
 }
 
 func (c context) IsRoot() bool {
-	if c.URL() == "/" {
+	if c.Path == "/" {
 		return true
 	}
 	return false
@@ -74,7 +70,7 @@ func (c context) isCurrent(pageTitle string) bool {
 }
 
 func (c context) isParent(pageTitle string) bool {
-	for _, parent := range strings.Split(c.URL(), "/") {
+	for _, parent := range strings.Split(c.Path, "/") {
 		if parent == pageTitle {
 			return true
 		}
@@ -82,8 +78,9 @@ func (c context) isParent(pageTitle string) bool {
 	return false
 }
 
-func makeContext(pagePath, sourceDir, outputDir string, exts []string) (c context) {
-	c.path = pagePath
+func makeContext(pagePath, sourceDir string, exts []string) (c context) {
+	c.Path = path.Clean("/" + pagePath)
+	c.filePath = path.Join(sourceDir, c.Path)
 	c.IsCurrent = func(params []string, data string) string {
 		if c.isCurrent(strings.Join(params, " ")) {
 			return data

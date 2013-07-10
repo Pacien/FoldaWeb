@@ -51,7 +51,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	// render the page
 	template := merge(elements)
-	page := mustache.Render(string(template), makeContext(path.Join(*settings.sourceDir, request), *settings.sourceDir, *settings.outputDir, settings.exts))
+	page := mustache.Render(string(template), makeContext(r.URL.Path, *settings.sourceDir, settings.exts))
 
 	// serve the page
 	_, err := w.Write([]byte(page))

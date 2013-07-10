@@ -98,10 +98,12 @@ func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, s
 		}
 	}
 
-	template := merge(elements)
-	page := mustache.Render(string(template), makeContext(dirPath, sourceDir, outputDir, exts))
+	pagePath := strings.TrimPrefix(dirPath, sourceDir)
 
-	err := fcmd.WriteFile(path.Join(outputDir, strings.TrimPrefix(dirPath, sourceDir), saveAs), []byte(page))
+	template := merge(elements)
+	page := mustache.Render(string(template), makeContext(pagePath, sourceDir, exts))
+
+	err := fcmd.WriteFile(path.Join(outputDir, pagePath, saveAs), []byte(page))
 	if err != nil {
 		fmt.Println(err)
 		return
