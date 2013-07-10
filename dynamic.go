@@ -35,16 +35,18 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the list of dirs to parse
-	request := strings.Trim(r.URL.Path, "/")
+	request := strings.TrimSuffix(r.URL.Path, "/")
 	dirs := strings.Split(request, "/")
-	if request != "" {
-		dirs = append(dirs, "")
+	for i, dir := range dirs {
+		if i != 0 {
+			dirs[i] = path.Join(dirs[i-1], dir)
+		}
 	}
 
 	// parse these dirs
 	elements := make(map[string][]byte)
-	for _, dir := range dirs {
-		parse(path.Join(*settings.sourceDir, dir), elements, settings.exts, false)
+	for i := len(dirs) - 1; i >= 0; i-- /*_, dir := range reverse dirs*/ {
+		parse(path.Join(*settings.sourceDir, dirs[i]), elements, settings.exts, false)
 	}
 
 	// render the page
