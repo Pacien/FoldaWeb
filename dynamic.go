@@ -34,6 +34,12 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// redirect to add the trailing slash if missing
+	if !strings.HasSuffix(r.URL.Path, "/") {
+		http.Redirect(w, r, r.URL.Path+"/", http.StatusFound)
+		return
+	}
+
 	// get the list of dirs to parse
 	request := strings.TrimSuffix(r.URL.Path, "/")
 	dirs := strings.Split(request, "/")
