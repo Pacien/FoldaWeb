@@ -1,19 +1,19 @@
 /*
 
-	This file is part of CompileTree (https://github.com/Pacien/CompileTree)
+	This file is part of FoldaWeb <https://github.com/Pacien/FoldaWeb>
 
-	CompileTree is free software: you can redistribute it and/or modify
+	FoldaWeb is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
 
-	CompileTree is distributed in the hope that it will be useful,
+	FoldaWeb is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
 
 	You should have received a copy of the GNU Affero General Public License
-	along with CompileTree. If not, see <http://www.gnu.org/licenses/>.
+	along with FoldaWeb. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -55,7 +55,7 @@ func init() {
 }
 
 func main() {
-	fmt.Println("CompileTree")
+	fmt.Println("FoldaWeb <https://github.com/Pacien/FoldaWeb>")
 	fmt.Println("Mode: " + *settings.mode)
 	fmt.Println("Source: " + *settings.sourceDir)
 	fmt.Println("Output: " + *settings.outputDir)
