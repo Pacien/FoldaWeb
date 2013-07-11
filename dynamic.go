@@ -45,8 +45,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	// parse these dirs
 	elements := make(map[string][]byte)
-	for i := len(dirs) - 1; i >= 0; i-- /*_, dir := range reverse dirs*/ {
-		parse(path.Join(*settings.sourceDir, dirs[i]), elements, settings.exts, false)
+	for i := len(dirs) - 1; i >= 0; i-- {
+		elements = parse(path.Join(*settings.sourceDir, dirs[i]), elements, settings.exts, false)
 	}
 
 	// render the page
