@@ -46,7 +46,7 @@ func parseParents(dir, sourceDir string, exts []string) map[string][]byte {
 	dirs := strings.Split(strings.TrimPrefix(dir, sourceDir), "/")
 	elements := make(map[string][]byte)
 	for _, dir := range dirs {
-		elements = parse(path.Join(sourceDir, dir), elements, exts, false)
+		elements, _ = parse(path.Join(sourceDir, dir), elements, exts, false)
 	}
 	return elements
 }

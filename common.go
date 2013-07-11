@@ -67,7 +67,8 @@ func merge(files map[string][]byte) (merged []byte) {
 
 // COMPILED and INTERACTIVE modes
 
-func parse(dirPath string, elements map[string][]byte, exts []string, overwrite bool) map[string][]byte {
+func parse(dirPath string, elements map[string][]byte, exts []string, overwrite bool) (map[string][]byte, bool) {
+	parsed := false
 	_, filesList := fcmd.Ls(dirPath)
 	for _, fileName := range filesList {
 		if isParsable(fileName, exts) && (overwrite || elements[fileName[:len(fileName)-len(path.Ext(fileName))]] == nil) {
@@ -76,9 +77,10 @@ func parse(dirPath string, elements map[string][]byte, exts []string, overwrite 
 			if err != nil {
 				fmt.Println(err)
 			}
+			parsed = true
 		}
 	}
-	return elements
+	return elements, parsed
 }
 
 func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, saveAs string, exts []string, recursive bool) {
@@ -88,7 +90,8 @@ func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, s
 		return
 	}
 
-	elements = parse(dirPath, elements, exts, true)
+	parsed := false
+	elements, parsed = parse(dirPath, elements, exts, true)
 
 	if recursive {
 		dirs, _ := fcmd.Ls(dirPath)
@@ -96,6 +99,10 @@ func compile(dirPath string, elements map[string][]byte, sourceDir, outputDir, s
 			wait.Add(1)
 			go compile(path.Join(dirPath, dir), elements, sourceDir, outputDir, saveAs, exts, recursive)
 		}
+	}
+
+	if !parsed {
+		return
 	}
 
 	pagePath := strings.TrimPrefix(dirPath, sourceDir)

@@ -46,7 +46,12 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// parse these dirs
 	elements := make(map[string][]byte)
 	for i := len(dirs) - 1; i >= 0; i-- {
-		elements = parse(path.Join(*settings.sourceDir, dirs[i]), elements, settings.exts, false)
+		parsed := false
+		elements, parsed = parse(path.Join(*settings.sourceDir, dirs[i]), elements, settings.exts, false)
+		if (i == len(dirs)-1) && !parsed {
+			http.Error(w, "404 page not found", http.StatusNotFound)
+			return
+		}
 	}
 
 	// render the page
