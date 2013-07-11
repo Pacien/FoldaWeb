@@ -69,6 +69,6 @@ func main() {
 	case "dynamic":
 		dynamic(*settings.port)
 	default:
-		panic("Invalid mode.")
+		fmt.Println("Invalid mode.")
 	}
 }
