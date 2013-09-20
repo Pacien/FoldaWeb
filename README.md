@@ -40,6 +40,7 @@ You can also pass custom settings via command line arguments:
     -sourceDir="./source": Path to the source directory.
     -outputDir="./out": Path to the output directory.
     -parsableExts="html, txt, md": Parsable file extensions separated by commas.
+    -skipPrefix="_": Folders with this prefix will be hidden in the output.
     -saveAs="index.html": Save compiled files as named.
     -startWith="index": Name without extension of the first file that will by parsed.
     -wordSeparator="-": Word separator used to replace spaces in URLs.

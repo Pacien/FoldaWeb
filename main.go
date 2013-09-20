@@ -39,6 +39,7 @@ type generator struct {
 	sourceDir, outputDir string
 	startWith, saveAs    string
 	wordSeparator        string
+	skipPrefix           string
 	parsableExts         []string
 
 	// go routine sync
@@ -69,6 +70,7 @@ func newGenerator() (g generator) {
 	flag.StringVar(&g.startWith, "startWith", "index", "Name without extension of the first file that will by parsed.")
 	flag.StringVar(&g.saveAs, "saveAs", "index.html", "Save compiled files as named.")
 	flag.StringVar(&g.wordSeparator, "wordSeparator", "-", "Word separator used to replace spaces in URLs.")
+	flag.StringVar(&g.skipPrefix, "skipPrefix", "_", "Folders with this prefix will be hidden in the output.")
 	var parsableExts string
 	flag.StringVar(&parsableExts, "parsableExts", "html, txt, md", "Parsable file extensions separated by commas.")
 
@@ -94,7 +96,15 @@ func (g *generator) sourcePath(filePath string) string {
 }
 
 func (g *generator) outputPath(filePath string) string {
-	return path.Join(g.outputDir, g.sanitizePath(filePath))
+	pathElements := strings.Split(filePath, "/")
+	var finalFilePath string
+	for _, element := range pathElements {
+		if !strings.HasPrefix(element, g.skipPrefix) {
+			finalFilePath = path.Join(finalFilePath, element)
+		}
+	}
+	fmt.Println(finalFilePath)
+	return path.Join(g.outputDir, g.sanitizePath(finalFilePath))
 }
 
 func (g *generator) isFileParsable(fileName string) bool {
@@ -191,7 +201,8 @@ func (g *generator) generate(page page) {
 	}
 
 	// Generate the page at the current directory
-	if containsParsableFiles {
+	_, currentDir := path.Split(currentDirPath)
+	if containsParsableFiles && !strings.HasPrefix(currentDir, g.skipPrefix) {
 		page.body = []byte(mustache.Render(string(g.mergeParts(page.parts)), g.contextualize(page)))
 
 		err := fcmd.WriteFile(g.outputPath(path.Join(page.dirPath, g.saveAs)), page.body)
