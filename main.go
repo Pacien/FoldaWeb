@@ -103,7 +103,6 @@ func (g *generator) outputPath(filePath string) string {
 			finalFilePath = path.Join(finalFilePath, element)
 		}
 	}
-	fmt.Println(finalFilePath)
 	return path.Join(g.outputDir, g.sanitizePath(finalFilePath))
 }
 
@@ -118,6 +117,7 @@ func (g *generator) isFileParsable(fileName string) bool {
 
 func (g *generator) copyFile(filePath string) {
 	defer g.tasks.Done()
+	fmt.Println("Copying: " + filePath)
 	err := fcmd.Cp(g.sourcePath(filePath), g.outputPath(filePath))
 	if err != nil {
 		fmt.Println(err)
@@ -203,8 +203,9 @@ func (g *generator) generate(page page) {
 	// Generate the page at the current directory
 	_, currentDir := path.Split(currentDirPath)
 	if containsParsableFiles && !strings.HasPrefix(currentDir, g.skipPrefix) {
-		page.body = []byte(mustache.Render(string(g.mergeParts(page.parts)), g.contextualize(page)))
+		fmt.Println("Rendering: " + currentDirPath)
 
+		page.body = []byte(mustache.Render(string(g.mergeParts(page.parts)), g.contextualize(page)))
 		err := fcmd.WriteFile(g.outputPath(path.Join(page.dirPath, g.saveAs)), page.body)
 		if err != nil {
 			fmt.Println(err)
