@@ -61,6 +61,14 @@ type page struct {
 
 type parts map[string][]byte
 
+func (p parts) clone() parts {
+	c := parts{}
+	for k, v := range p {
+		c[k] = v
+	}
+	return c
+}
+
 // Creates an initiated generator
 func newGenerator() (g generator) {
 
@@ -192,19 +200,17 @@ func (g *generator) generate(page page) {
 	}
 
 	// Generate subpages in surdirectories
-	currentDirPath := page.dirPath
 	for _, dir := range dirs {
-		page.dirPath = path.Join(currentDirPath, dir)
+		subPage := page
+		subPage.dirPath = path.Join(page.dirPath, dir)
+		subPage.parts = page.parts.clone()
 		g.tasks.Add(1)
-		go g.generate(page)
-		page.dirPath = currentDirPath
+		go g.generate(subPage)
 	}
 
 	// Generate the page at the current directory
-	_, currentDir := path.Split(currentDirPath)
-	if containsParsableFiles && !strings.HasPrefix(currentDir, g.skipPrefix) {
-		fmt.Println("Rendering: " + currentDirPath)
-
+	if _, currentDir := path.Split(page.dirPath); containsParsableFiles && !strings.HasPrefix(currentDir, g.skipPrefix) {
+		fmt.Println("Rendering: " + page.dirPath)
 		page.body = []byte(mustache.Render(string(g.mergeParts(page.parts)), g.contextualize(page)))
 		err := fcmd.WriteFile(g.outputPath(path.Join(page.dirPath, g.saveAs)), page.body)
 		if err != nil {
